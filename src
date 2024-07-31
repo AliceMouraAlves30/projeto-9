@@ -1,0 +1,267 @@
+importar  pandas  como  pd 
+importar  matplotlib.pyplot  como  plt 
+importar  seaborn  como  sns 
+importar  solicitações 
+de  io  importar  StringIO 
+importar  aleatório
+
+def  carregar_dados ( url ,  tipo_arquivo = 'CSV' ): 
+    try : 
+        if  'drive.google.com'  in  url : 
+            file_id  =  url . split ( '/' )[ - 2 ] 
+            download_url  =  f "https://drive.google.com/uc?export=download&id= { file_id } " 
+            response  =  requests . get ( download_url ) . content 
+            df  =  pd . read_csv ( StringIO ( response . decode ( 'utf-8' ))) 
+        else : 
+            df  =  pd . read_csv ( url ) 
+        return  df 
+    except  Exception  as  e : 
+        print ( f "Erro ao carregar os dados: { e } " ) 
+        return  None
+
+def  tratados_dados_faltantes ( df ): 
+    print ( " \n Tratamento de dados faltantes:" ) 
+    missing_data  =  df . é nulo () . soma () 
+    imprimir ( dados_faltados [ dados_faltados  >  0 ]) 
+    df  =  df . dropna ()   # Removendo linhas com valores faltantes 
+    return  df
+
+def  analise_exploratoria ( df ,  save_fig = False ): 
+    df  =  tratar_dados_faltantes ( df )
+
+    print ( "Primeiras linhas do DataFrame:" ) 
+    print ( df . head ())
+    
+    print ( " \n Informações sobre o DataFrame:" ) 
+    print ( df . info ())
+    
+    print ( " \n Estatísticas descritivas das variáveis ​​numéricas:" ) 
+    print ( df.describe ( ))
+    
+    # Desenhar histograma 
+    plot_histograma ( df ,  save_fig )
+    
+    # Plotar gráficos de barras 
+    plot_grafico_de_barras ( df ,  save_fig )
+    
+    # Plotar gráfico de pizza 
+    plot_grafico_de_pizza ( df ,  save_fig )
+    
+    # Plotar gráficos de linha 
+    plot_grafico_de_linha ( df ,  save_fig )
+    
+    # Plotar gráfico de dispersão 
+    plot_grafico_de_dispersao ( df ,  save_fig )
+    
+    # Desenhar boxplot 
+    plot_boxplot ( df ,  save_fig )
+    
+    # Plotar matriz de clareza 
+    identificacao_correlacoes ( df ,  save_fig )
+
+def plot_histograma(df, save_fig):
+    print("\nHistograma:")
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    if len(numeric_columns) > 0:
+        col = random.choice(numeric_columns)
+        sns.histplot(data=df, x=col, kde=True)
+        plt.title('Histograma - Distribuição dos Dados')
+        plt.xlabel(col)
+        plt.ylabel('Frequência')
+        if save_fig:
+            plt.savefig(f'histograma_{col}.png')
+        plt.show()
+    else:
+        print("Não há variáveis numéricas para plotar o histograma.")
+
+def plot_grafico_de_barras(df, save_fig):
+    print("\nGráfico de Barras:")
+    categorical_columns = df.select_dtypes(include=['object']).columns
+    if len(categorical_columns) > 0:
+        col = random.choice(categorical_columns)
+        if df[col].nunique() > 1:  
+            sns.countplot(data=df, x=col)
+            plt.title('Gráfico de Barras - Contagem por Categoria')
+            plt.xlabel(col)
+            plt.ylabel('Contagem')
+            if save_fig:
+                plt.savefig(f'barra_{col}.png')
+            plt.show()
+        else:
+            print(f"Não há dados únicos suficientes para a variável '{col}' para plotar o gráfico de barras.")
+    else:
+        print("Não há variáveis categóricas para plotar o gráfico de barras.")
+
+def plot_grafico_de_pizza(df, save_fig):
+    print("\nGráfico de Pizza:")
+    categorical_columns = df.select_dtypes(include=['object']).columns
+    if len(categorical_columns) > 0:
+        col = random.choice(categorical_columns)
+        counts = df[col].value_counts()
+        if counts.nunique() > 1: 
+            plt.pie(counts, labels=counts.index, autopct='%1.1f%%')
+            plt.title('Gráfico de Pizza - Distribuição de Categorias')
+            if save_fig:
+                plt.savefig(f'pizza_{col}.png')
+            plt.show()
+        else:
+            print(f"A variável '{col}' não possui diversidade de valores suficiente para plotar o gráfico de pizza.")
+    else:
+        print("Não há variáveis categóricas para plotar o gráfico de pizza.")
+
+def plot_grafico_de_linha(df, save_fig):
+    print("\nGráfico de Linha:")
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    if len(numeric_columns) > 1:
+        cols = random.sample(list(numeric_columns), 2)
+        df.plot(x=cols[0], y=cols[1])
+        plt.title('Gráfico de Linha - Tendência ao Longo do Tempo')
+        plt.xlabel(cols[0])
+        plt.ylabel(cols[1])
+        if save_fig:
+            plt.savefig(f'linha_{cols[0]}_{cols[1]}.png')
+        plt.show()
+    else:
+        print("Não há duas variáveis numéricas para plotar o gráfico de linha.")
+
+def plot_grafico_de_dispersao(df, save_fig):
+    print("\nGráfico de Dispersão:")
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    if len(numeric_columns) > 1:
+        cols = random.sample(list(numeric_columns), 2)
+        sns.scatterplot(data=df, x=cols[0], y=cols[1])
+        plt.title('Gráfico de Dispersão - Relação entre Variáveis')
+        plt.xlabel(cols[0])
+        plt.ylabel(cols[1])
+        if save_fig:
+            plt.savefig(f'dispersao_{cols[0]}_{cols[1]}.png')
+        plt.show()
+    else:
+        print("Não há duas variáveis numéricas para plotar o gráfico de dispersão.")
+
+def plot_boxplot(df, save_fig):
+    print("\nBoxplot:")
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    if len(numeric_columns) > 0:
+        sns.boxplot(data=df[numeric_columns])
+        plt.title('Boxplot - Distribuição e Dispersão dos Dados')
+        plt.ylabel('Valores')
+        if save_fig:
+            plt.savefig('boxplot.png')
+        plt.show()
+    else:
+        print("Não há variáveis numéricas para plotar o boxplot.")
+
+def identificacao_correlacoes(df, save_fig):
+    print("\nMatriz de Correlação:")
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    if len(numeric_columns) > 1:
+        sns.heatmap(df[numeric_columns].corr(), annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
+        plt.title('Matriz de Correlação - Relação entre Variáveis Numéricas')
+        if save_fig:
+            plt.savefig('correlacao.png')
+        plt.show()
+    else:
+        print("Não há correlações a serem identificadas com menos de duas variáveis numéricas.")
+
+def analise_especialista():
+    print("\nAnálise especializada:")
+    print("Essa é a análise especializada do assunto.")
+    print("Você pode adicionar suas próprias conclusões e insights aqui.")
+
+def main(urls, save_fig=False):
+    for url in urls:
+        df = carregar_dados(url)
+        if df is not None:
+            print("\nAnálise exploratória para o arquivo:", url)
+            analise_exploratoria(df, save_fig)
+            print("\n---")
+
+    analise_especialista()
+
+# URLs dos arquivos de dados
+urls = [
+    "https://drive.google.com/file/d/1aJmF3UUW59s3oL3saqi3W9csnYUYs4O4/view?usp=sharing"
+
+    # Adicione mais URLs aqui...
+]
+
+# Executar a análise de dados com a opção de salvar gráficos ativada
+main(urls, save_fig=True)
+Análise exploratória para o arquivo: https://drive.google.com/file/d/1aJmF3UUW59s3oL3saqi3W9csnYUYs4O4/view?usp=sharing
+
+Tratamento de dados faltantes:
+Series([], dtype: int64)
+Primeiras linhas do DataFrame:
+         Date        Open        High         Low       Close   Adj Close  \
+0  2014-09-17  465.864014  468.174011  452.421997  457.334015  457.334015   
+1  2014-09-18  456.859985  456.859985  413.104004  424.440002  424.440002   
+2  2014-09-19  424.102997  427.834991  384.532013  394.795990  394.795990   
+3  2014-09-20  394.673004  423.295990  389.882996  408.903992  408.903992   
+4  2014-09-21  408.084991  412.425995  393.181000  398.821014  398.821014   
+
+     Volume  
+0  21056800  
+1  34483200  
+2  37919700  
+3  36863600  
+4  26580100  
+
+Informações sobre o DataFrame:
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 3505 entries, 0 to 3504
+Data columns (total 7 columns):
+ #   Column     Non-Null Count  Dtype  
+---  ------     --------------  -----  
+ 0   Date       3505 non-null   object 
+ 1   Open       3505 non-null   float64
+ 2   High       3505 non-null   float64
+ 3   Low        3505 non-null   float64
+ 4   Close      3505 non-null   float64
+ 5   Adj Close  3505 non-null   float64
+ 6   Volume     3505 non-null   int64  
+dtypes: float64(5), int64(1), object(1)
+memory usage: 191.8+ KB
+None
+
+Estatísticas descritivas das variáveis numéricas:
+               Open          High           Low         Close     Adj Close  \
+count   3505.000000   3505.000000   3505.000000   3505.000000   3505.000000   
+mean   15890.348935  16262.529884  15492.619787  15907.486656  15907.486656   
+std    17619.066819  18043.450106  17150.136977  17634.128970  17634.128970   
+min      176.897003    211.731003    171.509995    178.102997    178.102997   
+25%     1007.650024   1040.469971    983.221008   1011.799988   1011.799988   
+50%     8671.212891   8843.366211   8395.120117   8672.455078   8672.455078   
+75%    26760.851562  27150.976562  26389.300781  26784.078125  26784.078125   
+max    73079.375000  73750.070312  71334.093750  73083.500000  73083.500000   
+
+             Volume  
+count  3.505000e+03  
+mean   1.712677e+10  
+std    1.928778e+10  
+min    5.914570e+06  
+25%    2.093120e+08  
+50%    1.276360e+10  
+75%    2.763576e+10  
+max    3.509679e+11  
+
+Histograma:
+No description has been provided for this image
+Gráfico de Barras:
+No description has been provided for this image
+Gráfico de Pizza:
+A variável 'Date' não possui diversidade de valores suficiente para plotar o gráfico de pizza.
+
+Gráfico de Linha:
+No description has been provided for this image
+Gráfico de Dispersão:
+No description has been provided for this image
+Boxplot:
+No description has been provided for this image
+Matriz de Correlação:
+No description has been provided for this image
+---
+
+Análise especializada:
+Essa é a análise especializada do assunto.
+Você pode adicionar suas próprias conclusões e insights aqui.
