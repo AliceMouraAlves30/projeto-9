@@ -1,0 +1,31 @@
+# Projeto de Análise de Dados com Visualizações
+
+Este projeto realiza a análise exploratória de dados (EDA) de um ou mais conjuntos de dados fornecidos, gerando visualizações gráficas que ajudam a entender melhor as características dos dados.
+
+## Funcionalidades
+- Carregamento de dados de URLs, incluindo links do Google Drive
+- Tratamento de dados faltantes
+- Geração de várias visualizações gráficas:
+  - Histogramas
+  - Gráficos de barras
+  - Gráficos de pizza
+  - Gráficos de linha
+  - Gráficos de dispersão
+  - Boxplots
+  - Matrizes de correlação
+- Análise especializada dos dados
+
+## Tecnologias Utilizadas
+- Python
+- Pandas
+- Matplotlib
+- Seaborn
+- Requests
+
+## Como Usar
+
+### Clone o Repositório:
+
+```bash
+git clone https://github.com/seu_usuario/seu_repositorio.git
+cd seu_repositorio
